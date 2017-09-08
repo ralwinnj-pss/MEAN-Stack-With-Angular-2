@@ -139,7 +139,7 @@ module.exports = (router) => {
         console.log(req.params);
 
         if (!req.params.email) {
-            
+
             res.json({
                 success: false,
                 message: 'E-mail was not provided.'
@@ -186,18 +186,18 @@ module.exports = (router) => {
     }); // router.get
 
     router.get('/checkUsername/:username', (req, res) => {
-        
+
         console.log(req.params);
-        
+
         if (!req.params.username) {
-            
+
             res.json({
                 success: false,
                 message: 'Username was not provided.'
             }); // res.json...
 
         } else {
-            
+
             User.findOne({
                 username: req.params.username
             }, (err, user) => {
@@ -237,9 +237,9 @@ module.exports = (router) => {
     }); // router.get...
 
     router.post('/login', (req, res) => {
-        
+
         if (!req.body.username) {
-            
+
             res.json({
                 success: false,
                 message: 'No username was provided.'
@@ -293,7 +293,7 @@ module.exports = (router) => {
                                 res.json({
                                     success: true,
                                     message: 'User logged in.'
-                                }) // res.json...
+                                }); // res.json...
 
                             } // else
 
