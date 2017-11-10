@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const config = require('../config/database');
 
 module.exports = (router) => {
 
@@ -289,10 +291,21 @@ module.exports = (router) => {
 
                             } // if (!validPassword)
                             else {
+                                const token = jwt.sign({
+                                        userId: user._id
+                                    },
+                                    config.secret, {
+                                        expiresIn: '24h'
+                                    }
+                                ); // jwt.sign
 
                                 res.json({
                                     success: true,
-                                    message: 'User logged in.'
+                                    message: 'User logged in.',
+                                    token: token,
+                                    user: {
+                                        user: user.username
+                                    }
                                 }); // res.json...
 
                             } // else
@@ -308,6 +321,59 @@ module.exports = (router) => {
         } // else 
 
     }); // router.post...
+
+    // NB! ONLY ROUTES THAT REQUIRE HEADER AUTHENTICATION AFTER THIS 
+    router.use((req, res, next) => {
+        const token = req.headers['authorization'];
+        if (!token) {
+            res.json({
+                success: false,
+                message: 'No token provided'
+            });
+        } else {
+            const decoded = jwt.verify(token, config.secret, (err, decoded) => {
+                if (err) {
+                    res.json({
+                        success: false,
+                        message: 'Token invalid: ' + err
+                    });
+                } else {
+                    req.decoded = decoded;
+                    next();
+                }
+            });
+        }
+    });
+
+    router.get('/profile', (req, res) => {
+        console.log(req.decoded);
+        User.findOne({
+                _id: req.decoded.userId
+            })
+            .select('username email')
+            .exec((err, user) => {
+                if (err) {
+                    res.json({
+                        success: false,
+                        messages: err
+                    });
+                } else {
+                    if (!user) {
+                        res.json({
+                            success: false,
+                            message: 'User not found'
+                        });
+
+                    } else {
+                        res.json({
+                            succes: true,
+                            user: user
+                        });
+                    }
+                }
+            })
+
+    })
 
     return router;
 

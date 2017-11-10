@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ export class LoginComponent implements OnInit {
   processing: Boolean = false;
   form: FormGroup;
 
-  constructor(private formBuilder: FormBuilder, private authService: AuthService) {
+  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
     this.createForm();
   }
 
@@ -47,7 +48,7 @@ export class LoginComponent implements OnInit {
     }
 
 
-    this.authService.loginUser(user)
+    this.authService.login(user)
       .subscribe(data => {
         console.log(data);
         if (!data.success) {
@@ -58,6 +59,11 @@ export class LoginComponent implements OnInit {
         } else {
           this.messageClass = 'alert alert-success';
           this.message = data.message;
+          this.authService.storeUserData(data.token, data.user);
+
+          setTimeout(() => {
+            this.router.navigate(['/dashboard'])
+          }, 2000)
         }
       })
   }
